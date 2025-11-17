@@ -1,10 +1,11 @@
-Final project
-
-
+# Wireless Communications Monte-Carlo Simulation – Final Project
 
 ## 0. Install Dependencies
 
-You will need the following dependencies:
+Make sure Python 3.x is installed. Then install the required packages:
 
-> pip install numpy
-> pip install matplotlib
+```bash
+pip install numpy
+
+pip install matplotlib
+

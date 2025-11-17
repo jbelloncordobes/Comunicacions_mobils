@@ -10,7 +10,7 @@ import numpy as np
 # ---------------------------
 # Simulation parameters
 # ---------------------------
-NUM_SNAPSHOTS = 10000      # Number of Monte-Carlo runs
+NUM_SNAPSHOTS = 150      # Number of Monte-Carlo runs
 CELL_RADIUS = 1000         # meters (typical macrocell)
 NUM_INTERFERING_CELLS = 18 # Surrounding cells around the center
 NUM_SECTORS = 3            # 3-sector antennas
@@ -31,4 +31,4 @@ SECTOR_ORIENTATION = 0     # central sector pointing = 0 degrees
 # Utility
 # ---------------------------
 # For reproducibility (optional)
-np.random.seed(1)
+#np.random.seed(1)

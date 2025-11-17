@@ -47,31 +47,38 @@ def generate_hex_grid():
     return np.array(centers)
 
 
-# -----------------------------------------------------
-# 2. RANDOM USER POSITION IN THE CENTRAL SECTOR
-# -----------------------------------------------------
 def random_user_position():
     """
-    Generates a random (x, y) uniformly inside the 120° main sector of the
-    central cell.
+    Generates a random (x, y) uniformly inside the central sector shaped
+    as a rhombus (two triangles covering 0°–120°).
 
     Returns:
         (x, y) : tuple of floats
     """
-    # Convert degrees to radians
-    angle_start = np.deg2rad(SECTOR_ORIENTATION - SECTOR_ANGLE / 2)
-    angle_end = np.deg2rad(SECTOR_ORIENTATION + SECTOR_ANGLE / 2)
+    h = CELL_RADIUS * np.sqrt(3)/2  # altura de un hexágono
 
-    # Uniform angle within the sector
-    theta = np.random.uniform(angle_start, angle_end)
+    # Triángulo base para 0°–60°
+    u = np.random.uniform(0, 1)
+    v = np.random.uniform(0, 1)
+    if u + v > 1:
+        u = 1 - u
+        v = 1 - v
 
-    # For uniform distribution in 2D area: r = R * sqrt(U)
-    r = CELL_RADIUS * np.sqrt(np.random.uniform(0, 1))
+    # Coordenadas dentro del triángulo 0°–60°
+    x = u * CELL_RADIUS + v * (CELL_RADIUS/2)
+    y = v * h
 
-    x = r * np.cos(theta)
-    y = r * np.sin(theta)
+    # Elegir aleatoriamente uno de los dos triángulos
+    if np.random.rand() < 0.5:
+        # Rotar 60° para el triángulo 60°–120°
+        angle = np.radians(60)
+        x_rot = x * np.cos(angle) - y * np.sin(angle)
+        y_rot = x * np.sin(angle) + y * np.cos(angle)
+        x, y = x_rot, y_rot
 
     return x, y
+
+
 
 
 # -----------------------------------------------------
