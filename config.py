@@ -1,34 +1,31 @@
-"""
-config.py
----------
-Configuration constants for the wireless communication Monte-Carlo simulation.
-These values are imported by all modules.
-"""
-
 import numpy as np
 
 # ---------------------------
 # Simulation parameters
 # ---------------------------
-NUM_SNAPSHOTS = 150      # Number of Monte-Carlo runs
-CELL_RADIUS = 1000         # meters (typical macrocell)
-NUM_INTERFERING_CELLS = 18 # Surrounding cells around the center
-NUM_SECTORS = 3            # 3-sector antennas
+NUM_SNAPSHOTS = 1500       # Cantidad de iteraciones Monte-Carlo
+CELL_RADIUS = 1000         # Metros
+NUM_CELLS = 19
+NUM_SECTORS = 3            # Sectores por celda
 
 # ---------------------------
 # Channel parameters
 # ---------------------------
-PATHLOSS_EXPONENT = 3.8    # ν
-SHADOW_FADING_STD = 8      # sigma in dB
+PATHLOSS_EXPONENT = 3.8
+SHADOW_FADING_STD = 8      # dB
 
 # ---------------------------
-# Antenna / geometry parameters
+# Physical parameters
 # ---------------------------
-SECTOR_ANGLE = 120         # degrees
-SECTOR_ORIENTATION = 0     # central sector pointing = 0 degrees
+TOTAL_BANDWIDTH = 100e6    # 100 MHz
+SNR_GAP_DB = 4.0
 
 # ---------------------------
-# Utility
+# Antenna Geometry
 # ---------------------------
-# For reproducibility (optional)
-#np.random.seed(1)
+# Asumimos orientación Flat-Top.
+# Sector 0 apunta a 30° (Noreste)
+# Sector 1 apunta a 150° (Noroeste)
+# Sector 2 apunta a 270° (Sur)
+SECTOR_BORESIGHTS = [30, 150, 270] 
+SECTOR_WIDTH = 120         # Ancho de haz perfecto
