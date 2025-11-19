@@ -103,6 +103,9 @@ def plot_cdf(data, label):
 # ==========================================
 # 1. EJERCICIO 1: REUSE FACTORS
 # ==========================================
+
+# def ex1():
+
 print("Simulating Question 1...")
 sir_n1 = run_simulation(reuse=1, alpha=0, v_exp=3.8)
 sir_n3 = run_simulation(reuse=3, alpha=0, v_exp=3.8)
@@ -132,6 +135,7 @@ print(f"Prob SIR >= -5 dB: N=1 -> {p1:.2%}, N=3 -> {p3:.2%}")
 # ==========================================
 # 2. EJERCICIO 2: POWER CONTROL (N=3)
 # ==========================================
+# def ex2():
 print("Simulating Question 2...")
 alphas = np.arange(0, 1.1, 0.1)
 best_alpha = 0
@@ -160,6 +164,7 @@ plt.show()
 # ==========================================
 # 4. EJERCICIO 4: THROUGHPUT
 # ==========================================
+# def ex4():
 print("Simulating Question 4...")
 # Throughput = (W/N) * log2(1 + SIR/Gamma)
 # Reuse implica dividir ancho de banda W entre los sectores/celdas.
@@ -187,3 +192,6 @@ plt.ylabel("CDF")
 plt.legend()
 plt.grid()
 plt.show()
+
+# if __name__ == "__main__":
+#     ex1()
