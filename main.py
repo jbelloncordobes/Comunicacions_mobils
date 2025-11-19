@@ -78,7 +78,6 @@ bs_centers = generate_hex_grid()
 
 def run_simulation(reuse, alpha, v_exp):
     sirs = []
-    from geometry import generate_hex_grid, generate_all_users
     
     centers = generate_hex_grid()
     users = generate_all_users(centers)
@@ -113,6 +112,7 @@ sir_n9 = run_simulation(reuse=9, alpha=0, v_exp=3.8)
 plt.figure(figsize=(8, 6))
 plot_cdf(sir_n1, "N=1")
 plot_cdf(sir_n3, "N=3")
+plot_cdf(sir_n9, "N=9")
 # N=9 es probable que no se vea si es infinito, agregamos nota
 plt.axvline(x=100, label="N=9 (Ideal)", linestyle="--", color="green")
 plt.axvline(-5, color='r', linestyle=':', label="Target -5 dB")
