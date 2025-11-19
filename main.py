@@ -56,15 +56,23 @@ for (x, y) in bs_centers:
     )
     ax.add_patch(hexagon)
 
+    angles = np.arange(6) * np.radians(60)
+    vx = x + CELL_RADIUS * np.cos(angles)
+    vy = y + CELL_RADIUS * np.sin(angles)
+    
+    # Draw 3 internal lines (every other vertex = 0, 2, 4)
+    for i in [0, 2, 4]:
+        ax.plot([x, vx[i]], [y, vy[i]], linestyle='dotted', linewidth=0.75, color='black')
+
 # Plot all user positions
 ax.scatter(user_positions[:,0], user_positions[:,1], s=5, c='red', alpha=0.5, label='Users')
 
 ax.set_aspect('equal')
-ax.set_xlabel('X [m]')
-ax.set_ylabel('Y [m]')
+# ax.set_xlabel('X [m]')
+# ax.set_ylabel('Y [m]')
 ax.set_title('User positions in the 19-cell hexagonal layout')
-ax.legend()
-plt.grid(True)
+# ax.legend()
+# plt.grid(True)
 plt.show()
 
 # ----------------------------
