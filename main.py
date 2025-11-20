@@ -197,4 +197,5 @@ def ex4(sir_n1, sir_n3, sir_n9):
 
 if __name__ == "__main__":
     sir_n1, sir_n3, sir_n9 = ex1()
-    
+    ex2()
+    ex4(sir_n1, sir_n3, sir_n9)
