@@ -104,94 +104,97 @@ def plot_cdf(data, label):
 # 1. EJERCICIO 1: REUSE FACTORS
 # ==========================================
 
-# def ex1():
+def ex1():
 
-print("Simulating Question 1...")
-sir_n1 = run_simulation(reuse=1, alpha=0, v_exp=3.8)
-sir_n3 = run_simulation(reuse=3, alpha=0, v_exp=3.8)
-# sir_n9 dará infinito en grid pequeño, lo simulamos igual
-sir_n9 = run_simulation(reuse=9, alpha=0, v_exp=3.8)
+    print("Simulating Question 1...")
+    sir_n1 = run_simulation(reuse=1, alpha=0, v_exp=3.8)
+    sir_n3 = run_simulation(reuse=3, alpha=0, v_exp=3.8)
+    # sir_n9 dará infinito en grid pequeño, lo simulamos igual
+    sir_n9 = run_simulation(reuse=9, alpha=0, v_exp=3.8)
 
-plt.figure(figsize=(8, 6))
-plot_cdf(sir_n1, "N=1")
-plot_cdf(sir_n3, "N=3")
-plot_cdf(sir_n9, "N=9")
-# N=9 es probable que no se vea si es infinito, agregamos nota
-plt.axvline(x=100, label="N=9 (Ideal)", linestyle="--", color="green")
-plt.axvline(-5, color='r', linestyle=':', label="Target -5 dB")
-plt.title("CDF of Uplink SIR (One user per sector)")
-plt.xlabel("SIR (dB)")
-plt.ylabel("CDF")
-plt.legend()
-plt.grid(True)
-plt.show()
+    plt.figure(figsize=(8, 6))
+    plot_cdf(sir_n1, "N=1")
+    plot_cdf(sir_n3, "N=3")
+    plot_cdf(sir_n9, "N=9")
+    # N=9 es probable que no se vea si es infinito, agregamos nota
+    plt.axvline(x=100, label="N=9 (Ideal)", linestyle="--", color="green")
+    plt.axvline(-5, color='r', linestyle=':', label="Target -5 dB")
+    plt.title("CDF of Uplink SIR (One user per sector)")
+    plt.xlabel("SIR (dB)")
+    plt.ylabel("CDF")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
-# Probabilidades > -5dB
-p1 = np.mean(10*np.log10(sir_n1) >= -5)
-p3 = np.mean(10*np.log10(sir_n3) >= -5)
-print(f"Prob SIR >= -5 dB: N=1 -> {p1:.2%}, N=3 -> {p3:.2%}")
+    # Probabilidades > -5dB
+    p1 = np.mean(10*np.log10(sir_n1) >= -5)
+    p3 = np.mean(10*np.log10(sir_n3) >= -5)
+    print(f"Prob SIR >= -5 dB: N=1 -> {p1:.2%}, N=3 -> {p3:.2%}")
+
+    return sir_n1, sir_n3, sir_n9
 
 
 # ==========================================
 # 2. EJERCICIO 2: POWER CONTROL (N=3)
 # ==========================================
-# def ex2():
-print("Simulating Question 2...")
-alphas = np.arange(0, 1.1, 0.1)
-best_alpha = 0
-best_prob = 0
-best_sirs = None
+def ex2():
+    print("Simulating Question 2...")
+    alphas = np.arange(0, 1.1, 0.1)
+    best_alpha = 0
+    best_prob = 0
+    best_sirs = None
 
-for a in alphas:
-    s = run_simulation(reuse=3, alpha=a, v_exp=3.8)
-    prob = np.mean(10*np.log10(s) >= -5)
-    if prob > best_prob:
-        best_prob = prob
-        best_alpha = a
-        best_sirs = s
+    for a in alphas:
+        s = run_simulation(reuse=3, alpha=a, v_exp=3.8)
+        prob = np.mean(10*np.log10(s) >= -5)
+        if prob > best_prob:
+            best_prob = prob
+            best_alpha = a
+            best_sirs = s
 
-print(f"Mejor Alpha: {best_alpha:.1f} con cobertura {best_prob:.2%}")
+    print(f"Mejor Alpha: {best_alpha:.1f} con cobertura {best_prob:.2%}")
 
-plt.figure()
-plot_cdf(sir_n3, "Alpha=0")
-plot_cdf(best_sirs, f"Alpha={best_alpha:.1f}")
-plt.title(f"Impact of Fractional Power Control (N=3)")
-plt.legend()
-plt.grid()
-plt.show()
+    plt.figure()
+    plot_cdf(sir_n3, "Alpha=0")
+    plot_cdf(best_sirs, f"Alpha={best_alpha:.1f}")
+    plt.title(f"Impact of Fractional Power Control (N=3)")
+    plt.legend()
+    plt.grid()
+    plt.show()
 
 
 # ==========================================
 # 4. EJERCICIO 4: THROUGHPUT
 # ==========================================
-# def ex4():
-print("Simulating Question 4...")
-# Throughput = (W/N) * log2(1 + SIR/Gamma)
-# Reuse implica dividir ancho de banda W entre los sectores/celdas.
-# N=1: BW total en cada sector? Ojo: "Universal BW reuse" -> W en cada sector.
-# N=3: "Different BW in each sector" -> W/3 por sector.
+def ex4(sir_n1, sir_n3, sir_n9):
+    print("Simulating Question 4...")
+    # Throughput = (W/N) * log2(1 + SIR/Gamma)
+    # Reuse implica dividir ancho de banda W entre los sectores/celdas.
+    # N=1: BW total en cada sector? Ojo: "Universal BW reuse" -> W en cada sector.
+    # N=3: "Different BW in each sector" -> W/3 por sector.
 
-gamma = 10**(SNR_GAP_DB/10)
+    gamma = 10**(SNR_GAP_DB/10)
 
-# Tasas
-rate_n1 = (TOTAL_BANDWIDTH / 1) * np.log2(1 + sir_n1 / gamma)
-rate_n3 = (TOTAL_BANDWIDTH / 3) * np.log2(1 + sir_n3 / gamma)
+    # Tasas
+    rate_n1 = (TOTAL_BANDWIDTH / 1) * np.log2(1 + sir_n1 / gamma)
+    rate_n3 = (TOTAL_BANDWIDTH / 3) * np.log2(1 + sir_n3 / gamma)
 
-plt.figure()
-# Función auxiliar para rate
-def plot_rate(data, lbl):
-    d = np.sort(data)/1e6
-    y = np.arange(len(d))/len(d)
-    plt.plot(d, y, label=lbl)
+    plt.figure()
+    # Función auxiliar para rate
+    def plot_rate(data, lbl):
+        d = np.sort(data)/1e6
+        y = np.arange(len(d))/len(d)
+        plt.plot(d, y, label=lbl)
 
-plot_rate(rate_n1, "N=1 (BW=100M)")
-plot_rate(rate_n3, "N=3 (BW=33M)")
-plt.title("User Throughput CDF")
-plt.xlabel("Mbps")
-plt.ylabel("CDF")
-plt.legend()
-plt.grid()
-plt.show()
+    plot_rate(rate_n1, "N=1 (BW=100M)")
+    plot_rate(rate_n3, "N=3 (BW=33M)")
+    plt.title("User Throughput CDF")
+    plt.xlabel("Mbps")
+    plt.ylabel("CDF")
+    plt.legend()
+    plt.grid()
+    plt.show()
 
-# if __name__ == "__main__":
-#     ex1()
+if __name__ == "__main__":
+    sir_n1, sir_n3, sir_n9 = ex1()
+    
