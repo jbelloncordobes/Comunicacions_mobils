@@ -24,25 +24,28 @@ def plot_snapshot_geometry(bs_centers, users_tensor):
             radius=CELL_RADIUS,
             orientation=np.radians(30), 
             facecolor='none',
-            edgecolor='gray',
-            linestyle='--'
+            edgecolor='gray'
+            # linestyle='--'
         )
         ax.add_patch(hex_patch)
+
+
+        # Generar sectores
         angles = np.arange(6) * np.radians(60)
         vx = x + CELL_RADIUS * np.cos(angles)
         vy = y + CELL_RADIUS * np.sin(angles)
-    
-        # Draw 3 internal lines (every other vertex = 0, 2, 4)
+
         for i in [0, 2, 4]:
-            ax.plot([x, vx[i]], [y, vy[i]], linestyle='dotted', color='black')
+            ax.plot([x, vx[i]], [y, vy[i]], linestyle='dotted', color='gray')
         
         # Poner número de celda
         ax.text(x, y, str(i), ha='center', va='center', fontsize=8, color='black')
 
     # 2. Dibujar Usuarios (Coloreados por sector)
-    # Sector 0 (30°) -> Rojo
-    # Sector 1 (150°) -> Verde
-    # Sector 2 (270°) -> Azul
+    # Sector 0 (~0°)   -> Rojo
+    # Sector 1 (~120°) -> Verde
+    # Sector 2 (~240°) -> Azul
+
     colors = ['red', 'green', 'blue']
     labels = ['Sector 0', 'Sector 1', 'Sector 2']
     
@@ -115,7 +118,7 @@ def ex1():
     plt.figure(figsize=(8, 6))
     plot_cdf(sir_n1, "N=1")
     plot_cdf(sir_n3, "N=3")
-    plot_cdf(sir_n9, "N=9")
+    # plot_cdf(sir_n9, "N=9")
     # N=9 es probable que no se vea si es infinito, agregamos nota
     plt.axvline(x=100, label="N=9 (Ideal)", linestyle="--", color="green")
     plt.axvline(-5, color='r', linestyle=':', label="Target -5 dB")
@@ -197,5 +200,5 @@ def ex4(sir_n1, sir_n3, sir_n9):
 
 if __name__ == "__main__":
     sir_n1, sir_n3, sir_n9 = ex1()
-    ex2()
-    ex4(sir_n1, sir_n3, sir_n9)
+    # ex2()
+    # ex4(sir_n1, sir_n3, sir_n9)
