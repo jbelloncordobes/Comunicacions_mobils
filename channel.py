@@ -53,18 +53,14 @@ def shadow_fading(num_samples):
 # -----------------------------------------------------
 # 3. TOTAL CHANNEL GAIN
 # -----------------------------------------------------
-def total_channel_gain(distances):
-    """
-    Computes total channel gain for each distance, including:
-        - Path loss
-        - Shadow fading (log-normal)
-
-    Args:
-        distances : ndarray (19,)
-
-    Returns:
-        gains : ndarray (19,)
-    """
-    pl = path_loss(distances)
-    sf = shadow_fading(len(distances))
+def get_channel_gain(distance, pathloss_exp):
+    # Evitar log(0)
+    dist = np.maximum(distance, 1.0)
+    pl = dist ** (-pathloss_exp)
+    
+    # Shadowing independiente
+    num_samples = 1 if np.isscalar(dist) else len(dist)
+    X_dB = np.random.normal(0, SHADOW_FADING_STD, num_samples)
+    sf = 10 ** (X_dB / 10.0)
+    
     return pl * sf

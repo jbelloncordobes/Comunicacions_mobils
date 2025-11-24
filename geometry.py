@@ -1,116 +1,143 @@
-"""
-geometry.py
------------
-Hexagonal cell geometry and user-position generation for the simulation.
-"""
-
 import numpy as np
-from config import CELL_RADIUS, SECTOR_ANGLE, SECTOR_ORIENTATION
+from config import CELL_RADIUS, SECTOR_BORESIGHTS
 
-
-# -----------------------------------------------------
-# 1. GET COORDINATES OF THE 19 CELL CENTERS
-# -----------------------------------------------------
 def generate_hex_grid():
-    """
-    Generates the 19 hexagonal cell centers (central + 2 rings).
-    ADJUSTMENT: Rotated 30 degrees to match 'Flat-Topped' orientation
-    typically used in plots, ensuring no gaps between cells.
-    
-    Returns:
-        centers : ndarray of shape (19, 2)
-    """
-    centers = [(0, 0)]  # Central cell at origin
-
-    # Hex grid directions (distance between adjacent BS sites = sqrt(3) * R)
+    """ Genera los centros de las 19 celdas (sin cambios) """
+    centers = [(0, 0)]
     d = np.sqrt(3) * CELL_RADIUS
-
-    # CORRECCIÓN: Las direcciones ahora están rotadas 30 grados.
-    # Ángulos: 30, 90, 150, 210, 270, 330.
-    # Esto corresponde a:
-    # 30:  (sqrt(3)/2, 0.5)
-    # 90:  (0, 1)
-    # 150: (-sqrt(3)/2, 0.5)
-    # ...
-    
-    s3_2 = np.sqrt(3) / 2  # Valor de cos(30) o sin(60) -> aprox 0.866
-    
+    # Direcciones rotadas 30 grados para flat-top
+    s3_2 = np.sqrt(3) / 2
     directions = [
-        (s3_2, 0.5),   # 30 grados
-        (0, 1),        # 90 grados
-        (-s3_2, 0.5),  # 150 grados
-        (-s3_2, -0.5), # 210 grados
-        (0, -1),       # 270 grados
-        (s3_2, -0.5)   # 330 grados
+        (s3_2, 0.5), (0, 1), (-s3_2, 0.5),
+        (-s3_2, -0.5), (0, -1), (s3_2, -0.5)
     ]
-
-    # First ring (6 points)
+    # Anillo 1
     for dx, dy in directions:
         centers.append((d * dx, d * dy))
-
-    # Second ring (12 points)
+    # Anillo 2
     for i in range(6):
         dx1, dy1 = directions[i]
         dx2, dy2 = directions[(i + 1) % 6]
-
-        # Two points between each pair
-        # Punto intermedio (la suma vectorial apunta al hueco correcto)
         centers.append((d * (dx1 + dx2), d * (dy1 + dy2)))
-        # Punto extremo (2 veces la dirección principal)
         centers.append((2 * d * dx1, 2 * d * dy1))
-
     return np.array(centers)
 
-
-def random_user_position():
+def get_random_user_in_sector_0():
     """
-    Generates a random (x, y) uniformly inside the central sector shaped
-    as a rhombus (two triangles covering 0°–120°).
+    Generates a uniformly distributed user inside a 120° sector 
+    of a flat-top hexagonal cell.
 
-    Returns:
-        (x, y) : tuple of floats
+    Sector 0 is centered at 0° and spans [-60°, +60°].
     """
-    h = CELL_RADIUS * np.sqrt(3)/2  # altura de un hexágono
 
-    # Triángulo base para 0°–60°
-    u = np.random.uniform(0, 1)
-    v = np.random.uniform(0, 1)
-    # Si el punto cae fuera del triángulo (en el cuadrado unitario), lo reflejamos
-    if u + v > 1:
-        u = 1 - u
-        v = 1 - v
+    # 1. Sample angle inside sector
+    # theta = np.radians(np.random.uniform(-60, +60))
+    theta = np.radians(np.random.uniform(0, +120))
 
-    # Transformación de coordenadas oblicuas a cartesianas
-    # Base vectores: (R, 0) y (R/2, h) -> Ángulo 0 y 60
-    x = u * CELL_RADIUS + v * (CELL_RADIUS/2)
-    y = v * h
+    # 2. Hex boundary at this angle
+    # flat-top hex (0° faces), no additional rotation needed
+    R = CELL_RADIUS
+    denom = abs(np.cos(theta)) + np.sqrt(3)*abs(np.sin(theta))
+    Rmax = R / denom
 
-    # Elegir aleatoriamente uno de los dos triángulos para cubrir 120 grados
-    if np.random.rand() < 0.5:
-        # Rotar 60° para el triángulo 60°–120°
-        angle = np.radians(60)
-        x_rot = x * np.cos(angle) - y * np.sin(angle)
-        y_rot = x * np.sin(angle) + y * np.cos(angle)
-        x, y = x_rot, y_rot
+    # 3. Uniform area sampling
+    r = np.sqrt(np.random.rand()) * Rmax
 
-    return x, y
+    # 4. Cartesian coordinates
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
+    return np.array([x, y])
 
+# def get_random_user_in_sector_0():
+#     """
+#     Genera un usuario aleatorio uniforme en un rombo de 120 grados
+#     orientado a 30 grados (Sector 0 estándar).
+#     Usamos la técnica del rombo (dos vectores base). 
+#     """
 
-# -----------------------------------------------------
-# 3. DISTANCES BETWEEN USER AND ALL BS SITES
-# -----------------------------------------------------
-def compute_distances(user_pos, centers):
+#     # Vectores base para un rombo de 120 grados (0 a 120 grados geométricos)
+#     # Luego rotaremos para alinear con 30 grados.
+#     u = np.random.rand() 
+#     v = np.random.rand()
+
+#     # Lado del hexágono = Radius
+#     # Altura apotema = Radius * sqrt(3)/2
+
+#     # Coordenadas en sistema oblicuo transformadas a cartesianas
+#     # Para cubrir un sector de 120 grados de un hexágono uniformemente:
+#     # Es más fácil generar en un triangulo equilatero y reflejar,
+#     # o usar coordenadas polares con corrección de área.
+
+#     # Método polar corregido para densidad uniforme de área:
+#     # r ~ sqrt(uniform(0,1)) * R_max(theta)
+#     # Pero R_max depende del ángulo en un hexágono.
+
+#     # Método simple (Rejection Sampling):
+#     # Generar en caja, rotar y chequear. Es rápido y exacto.
+
+#     while True:
+#         # Generar punto en el cuadrado que contiene al hexágono
+#         x = np.random.uniform(-CELL_RADIUS, CELL_RADIUS) 
+#         y = np.random.uniform(-CELL_RADIUS, CELL_RADIUS)
+
+#         # Angulo y radio
+#         angle_deg = np.degrees(np.arctan2(y, x)) % 360
+#         dist = np.sqrt(x**2 + y**2)
+
+#         # Verificar si está dentro del Sector 0 (Angulos 0 a +120)
+#         in_angle = (angle_deg <= 120)
+
+#         # Verificar distancia al borde del hexágono
+#         # Ecuación polar del hexágono: R_max(theta)
+#         # r * cos(theta - k*60) <= sqrt(3)/2 * R
+#         # Simplemente usamos la condición geométrica simple:
+#         # Proyección sobre ejes rotados.
+
+#         if in_angle:
+#             # Check hex boundary
+#             # Condición: x*cos(30) + y*sin(30) <= apotema ... etc
+#             # Manera rápida: q = abs(x), si q > R...
+#             # Usaremos una aproximación poligonal exacta:
+#             p_angle = np.radians(angle_deg)
+#             # Distancia máxima en ese ángulo para un hexágono "flat top"
+#             # El radio varía. Para simplificar simulación académica:
+#             # Aceptamos si dist < Apotema (conservador) o dist < Radio (optimista).
+#             # El enunciado dice "Uniform within their sectors".
+#             # Haremos: si dist < CELL_RADIUS * 0.866 (apotema), aceptamos seguro.
+#             # Si no, chequeo fino.
+
+#             # Simplificación aceptada en la mayoría de proyectos: Radio circular para sector
+#             # Si quieres hexágono exacto:
+#             phi = np.radians(angle_deg % 60 - 30)
+#             rmax = (np.sqrt(3)/2 * CELL_RADIUS) / np.cos(phi)
+#             if dist <= rmax: 
+#                 return np.array([x, y])
+
+def generate_all_users(bs_centers):
     """
-    Computes distance between the user and each BS site.
-
-    Args:
-        user_pos : tuple (x, y)
-        centers : ndarray of shape (19, 2)
-
-    Returns:
-        distances : ndarray of shape (19,)
+    Retorna: Array de forma (19, 3, 2)
+    Dim 0: Indice de Celda (0..18)
+    Dim 1: Indice de Sector (0..2)
+    Dim 2: Coordenadas x,y
     """
-    ux, uy = user_pos
-    dx = centers[:, 0] - ux
-    dy = centers[:, 1] - uy
-    return np.sqrt(dx**2 + dy**2)
+    users = np.zeros((19, 3, 2))
+    
+    for c_idx, center in enumerate(bs_centers):
+        for s_idx in range(3):
+            # Generar usuario en sector 0 (base)
+            u_local = get_random_user_in_sector_0()
+            
+            # Rotar según el sector
+            # Sector 0: 0 rotación adicional (ya está en 30deg boresight)
+            # Sector 1: +120 grados
+            # Sector 2: +240 grados
+            rot_angle = np.radians(s_idx * 120)
+            c, s = np.cos(rot_angle), np.sin(rot_angle)
+            R = np.array(((c, -s), (s, c)))
+            
+            u_rotated = R.dot(u_local)
+            
+            # Desplazar al centro de la celda
+            users[c_idx, s_idx] = center + u_rotated
+            
+    return users
