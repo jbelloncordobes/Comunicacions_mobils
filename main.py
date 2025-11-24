@@ -79,20 +79,20 @@ def plot_snapshot_geometry(bs_centers, users_tensor):
 # Setup inicial
 bs_centers = generate_hex_grid()
 
-def run_simulation(reuse, alpha, v_exp):
+def run_simulation(reuse, powcont, v_exp):
     sirs = []
     
-    centers = generate_hex_grid()
-    users = generate_all_users(centers)
+    # centers = generate_hex_grid()
+    # users = generate_all_users(centers)
     
-    print("Mostrando geometría... Cierra la ventana para continuar.")
-    plot_snapshot_geometry(centers, users)
+    # print("Mostrando geometría... Cierra la ventana para continuar.")
+    # plot_snapshot_geometry(centers, users)
     for _ in range(NUM_SNAPSHOTS): # tqdm para barra de progreso si quieres
         # 1. Generar 57 usuarios (3 por celda)
         users = generate_all_users(bs_centers)
         
         # 2. Calcular SIR para el link central
-        val = calculate_uplink_sir(users, bs_centers, reuse, alpha, v_exp)
+        val = calculate_uplink_sir(users, bs_centers, reuse, powcont, v_exp)
         sirs.append(val)
     return np.array(sirs)
 
@@ -110,10 +110,10 @@ def plot_cdf(data, label):
 def ex1():
 
     print("Simulating Question 1...")
-    sir_n1 = run_simulation(reuse=1, alpha=0, v_exp=3.8)
-    sir_n3 = run_simulation(reuse=3, alpha=0, v_exp=3.8)
+    sir_n1 = run_simulation(reuse=1, powcont=0, v_exp=3.8)
+    sir_n3 = run_simulation(reuse=3, powcont=0, v_exp=3.8)
     # sir_n9 dará infinito en grid pequeño, lo simulamos igual
-    sir_n9 = run_simulation(reuse=9, alpha=0, v_exp=3.8)
+    sir_n9 = run_simulation(reuse=9, powcont=0, v_exp=3.8)
 
     plt.figure(figsize=(8, 6))
     plot_cdf(sir_n1, "N=1")
@@ -142,24 +142,24 @@ def ex1():
 # ==========================================
 def ex2():
     print("Simulating Question 2...")
-    alphas = np.arange(0, 1.1, 0.1)
-    best_alpha = 0
+    powconts = np.arange(0, 1.1, 0.1)
+    best_powcont = 0
     best_prob = 0
     best_sirs = None
 
-    for a in alphas:
-        s = run_simulation(reuse=3, alpha=a, v_exp=3.8)
+    for a in powconts:
+        s = run_simulation(reuse=3, powcont=a, v_exp=3.8)
         prob = np.mean(10*np.log10(s) >= -5)
         if prob > best_prob:
             best_prob = prob
-            best_alpha = a
+            best_powcont = a
             best_sirs = s
 
-    print(f"Mejor Alpha: {best_alpha:.1f} con cobertura {best_prob:.2%}")
+    print(f"Mejor Power Control: {best_powcont:.1f} con cobertura {best_prob:.2%}")
 
     plt.figure()
-    plot_cdf(sir_n3, "Alpha=0")
-    plot_cdf(best_sirs, f"Alpha={best_alpha:.1f}")
+    plot_cdf(sir_n3, "Power Control = 0")
+    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f}")
     plt.title(f"Impact of Fractional Power Control (N=3)")
     plt.legend()
     plt.grid()
@@ -199,6 +199,6 @@ def ex4(sir_n1, sir_n3, sir_n9):
     plt.show()
 
 if __name__ == "__main__":
-    sir_n1, sir_n3, sir_n9 = ex1()
-    # ex2()
-    # ex4(sir_n1, sir_n3, sir_n9)
+    sir_n1, sir_n3, sir_n9 = ex1() # Tenemos que tener en cuenta solo los sectores en la dirección del sector 0. Dos sectores se cortan por la mitad así que tenemos en cuenta solo 1 sector por esos dos.
+    ex2()
+    ex4(sir_n1, sir_n3, sir_n9)

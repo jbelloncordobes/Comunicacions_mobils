@@ -55,7 +55,7 @@ def shadow_fading(num_samples):
 # -----------------------------------------------------
 def get_channel_gain(distance, pathloss_exp):
     # Evitar log(0)
-    dist = np.maximum(distance, 1.0)
+    dist = np.maximum(distance, 1.0) # No puede ser superior a 1
     pl = dist ** (-pathloss_exp)
     
     # Shadowing independiente

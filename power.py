@@ -2,7 +2,7 @@ import numpy as np
 from config import SECTOR_BORESIGHTS, SECTOR_WIDTH
 from channel import get_channel_gain
 
-def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, alpha, pathloss_exp):
+def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathloss_exp):
     """
     Calcula SIR para el usuario en Celda 0, Sector 0.
     
@@ -14,12 +14,13 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, alpha, pathloss
     victim_pos = users_tensor[0, 0]
     bs_victim_pos = bs_centers[0] # (0,0)
     
+    # Calcula la distancia de la victima a su centro y el pathloss de dicha distancia (R)
     dist_own = np.linalg.norm(victim_pos - bs_victim_pos)
     gain_own = get_channel_gain(dist_own, pathloss_exp)
     
     # Potencia Transmisión Víctima (Power Control)
-    p_tx_victim = gain_own ** (-alpha)
-    p_rx_signal = p_tx_victim * gain_own
+    p_tx_victim = gain_own ** (-powcont)
+    p_rx_signal = p_tx_victim * gain_own #Falta por checkear
     
     # --- 2. Calcular Interferencia ---
     interference_sum = 0.0
@@ -68,7 +69,7 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, alpha, pathloss
             # Distancia a SU propia BS (para Power Control)
             dist_to_own_bs = np.linalg.norm(interferer_pos - bs_centers[c])
             gain_to_own = get_channel_gain(dist_to_own_bs, pathloss_exp)
-            p_tx_interferer = gain_to_own ** (-alpha)
+            p_tx_interferer = gain_to_own ** (-powcont)
             
             # Distancia a BS Víctima (BS 0)
             dist_to_victim_bs = np.linalg.norm(interferer_pos - bs_centers[0])
