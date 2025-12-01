@@ -16,9 +16,13 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
     
     # Calcula la distancia de la victima a su centro y el pathloss de dicha distancia (R)
     R = np.linalg.norm(victim_pos - bs_victim_pos)
-    signal = (R ** (powcont * pathloss_exp)) * (R ** (-pathloss_exp))
+    # signal = (R ** (powcont * pathloss_exp)) * (R ** (-pathloss_exp))
+    # victim_pathloss = 1/(R ** pathloss_exp)
+    # signal = victim_pathloss * (10 ** (SHADOW_FADING_STD/10))
+    signal = get_channel_gain(R, pathloss_exp)
     # --- 2. Calcular Interferencia ---
     interference_sum = 0.0
+    interference_count = 0
     
     # Iteramos sobre TODAS las celdas y TODOS los sectores
     for c in range(19):
@@ -61,10 +65,17 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
             # --- SI ES CO-CANAL, CALCULAMOS POTENCIA ---
             interferer_pos = users_tensor[c, s]
             D = np.linalg.norm(victim_pos - interferer_pos)
+            # interference_sum += (R/D) ** pathloss_exp
             interference_sum += (D/R) ** pathloss_exp
+            interference_count += 1
+
+            # print(f"Interference {interference_count}: {(D/R) ** pathloss_exp}/{interference_sum}")
         
 
     if interference_sum == 0:
         return np.inf # Caso ideal
         
-    return signal/interference_sum
+    return 10*np.log10(interference_sum)
+    # return 10*np.log10(interference_sum/interference_count)
+    # return 10 * np.log10(signal/interference_sum)
+    # return 10 * np.log10(interference_sum)
