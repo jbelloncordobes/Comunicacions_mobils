@@ -201,5 +201,5 @@ def ex4(sir_n1, sir_n3, sir_n9):
 
 if __name__ == "__main__":
     sir_n1, sir_n3, sir_n9 = ex1() # Tenemos que tener en cuenta solo los sectores en la dirección del sector 0. Dos sectores se cortan por la mitad así que tenemos en cuenta solo 1 sector por esos dos.
-    # ex2()
+    ex2()
     # ex4(sir_n1, sir_n3, sir_n9)
