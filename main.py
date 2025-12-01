@@ -132,7 +132,8 @@ def ex1():
     # Probabilidades > -5dB
     p1 = np.mean(10*np.log10(sir_n1) >= -5)
     p3 = np.mean(10*np.log10(sir_n3) >= -5)
-    print(f"Prob SIR >= -5 dB: N=1 -> {p1:.2%}, N=3 -> {p3:.2%}")
+    p9 = np.mean(10*np.log10(sir_n9) >= -5)
+    print(f"Prob SIR >= -5 dB: N=1 -> {p1:.2%}, N=3 -> {p3:.2%}, N=9 -> {p9:.2%}")
 
     return sir_n1, sir_n3, sir_n9
 
