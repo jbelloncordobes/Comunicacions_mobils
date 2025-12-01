@@ -13,6 +13,26 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
     # Usuario víctima: Celda 0, Sector 0
     victim_pos = users_tensor[0, 0]
     bs_victim_pos = bs_centers[0] # (0,0)
+    mp = dict()
+    mp[0] = []
+    mp[1] = [0, 1, 2]
+    mp[2] = [0, 1, 2]
+    mp[3] = []
+    mp[4] = []
+    mp[5] = []
+    mp[6] = []
+    mp[7] = [0, 1, 2]
+    mp[8] = [0, 1, 2]
+    mp[9] = [0, 2]
+    mp[10] = [0, 1, 2]
+    mp[11] = []
+    mp[12] = []
+    mp[13] = []
+    mp[14] = []
+    mp[15] = []
+    mp[16] = []
+    mp[17] = [0]
+    mp[18] = []
     
     # Calcula la distancia de la victima a su centro y el pathloss de dicha distancia (R)
     dist_own = np.linalg.norm(victim_pos - bs_victim_pos)
@@ -38,7 +58,8 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
             
             if reuse_factor == 1:
                 # Todos los sectores de todas las celdas usan la freq
-                is_co_channel = True
+                if s in mp[c]:
+                    is_co_channel = True
                 
             elif reuse_factor == 3:
                 # Reuso por sector: Solo el sector con misma orientación usa la freq
