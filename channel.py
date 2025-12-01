@@ -46,7 +46,7 @@ def shadow_fading(num_samples):
     Returns:
         sf : ndarray of shape (num_samples,)
     """
-    X = np.random.normal(0, SHADOW_FADING_STD, num_samples)
+    X = np.random.normal(loc = 0, scale = SHADOW_FADING_STD, size = num_samples)
     return 10 ** (X / 10)
 
 

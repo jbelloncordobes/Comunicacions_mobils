@@ -86,7 +86,6 @@ def run_simulation(reuse, powcont, v_exp):
     # users = generate_all_users(centers)
     
     # print("Mostrando geometría... Cierra la ventana para continuar.")
-    # plot_snapshot_geometry(centers, users)
     for _ in range(NUM_SNAPSHOTS): # tqdm para barra de progreso si quieres
         # 1. Generar 57 usuarios (3 por celda)
         users = generate_all_users(bs_centers)
@@ -118,7 +117,6 @@ def ex1():
     plt.figure(figsize=(8, 6))
     plot_cdf(sir_n1, "N=1")
     plot_cdf(sir_n3, "N=3")
-    # plot_cdf(sir_n9, "N=9")
     # N=9 es probable que no se vea si es infinito, agregamos nota
     plt.axvline(x=100, label="N=9 (Ideal)", linestyle="--", color="green")
     plt.axvline(-5, color='r', linestyle=':', label="Target -5 dB")
@@ -146,21 +144,27 @@ def ex2():
     best_powcont = 0
     best_prob = 0
     best_sirs = None
+    baseline_sirs = None
 
     for a in powconts:
         s = run_simulation(reuse=3, powcont=a, v_exp=3.8)
         prob = np.mean(10*np.log10(s) >= -5)
+
+        if a == 0:
+            baseline_sirs = s
+
         if prob > best_prob:
             best_prob = prob
             best_powcont = a
             best_sirs = s
 
-    print(f"Mejor Power Control: {best_powcont:.1f} con cobertura {best_prob:.2%}")
+    print(f"Best power control exponent: α = {best_powcont:.1f}")
+    print(f"Coverage P(SIR ≥ -5 dB): {best_prob:.2%}")
 
     plt.figure()
-    plot_cdf(sir_n3, "Power Control = 0")
-    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f}")
-    plt.title(f"Impact of Fractional Power Control (N=3)")
+    plot_cdf(baseline_sirs, "Power Control α = 0")
+    plot_cdf(best_sirs, f"Power Control α = {best_powcont:.1f}")
+    plt.title("Impact of Fractional Power Control (Reuse=3)")
     plt.legend()
     plt.grid()
     plt.show()

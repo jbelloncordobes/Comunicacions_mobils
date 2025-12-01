@@ -15,13 +15,8 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
     bs_victim_pos = bs_centers[0] # (0,0)
     
     # Calcula la distancia de la victima a su centro y el pathloss de dicha distancia (R)
-    dist_own = np.linalg.norm(victim_pos - bs_victim_pos)
-    gain_own = get_channel_gain(dist_own, pathloss_exp)
-    
-    # Potencia Transmisión Víctima (Power Control)
-    p_tx_victim = gain_own ** (-powcont)
-    p_rx_signal = p_tx_victim * gain_own #Falta por checkear
-    
+    R = np.linalg.norm(victim_pos - bs_victim_pos)
+    signal = (R ** (powcont * pathloss_exp)) * (R ** (-pathloss_exp))
     # --- 2. Calcular Interferencia ---
     interference_sum = 0.0
     
@@ -65,36 +60,11 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
 
             # --- SI ES CO-CANAL, CALCULAMOS POTENCIA ---
             interferer_pos = users_tensor[c, s]
-            
-            # Distancia a SU propia BS (para Power Control)
-            dist_to_own_bs = np.linalg.norm(interferer_pos - bs_centers[c])
-            gain_to_own = get_channel_gain(dist_to_own_bs, pathloss_exp)
-            p_tx_interferer = gain_to_own ** (-powcont)
-            
-            # Distancia a BS Víctima (BS 0)
-            dist_to_victim_bs = np.linalg.norm(interferer_pos - bs_centers[0])
-            gain_to_victim = get_channel_gain(dist_to_victim_bs, pathloss_exp)
-            
-            # --- FILTRO 2: ANTENA SECTORIAL DE BS VÍCTIMA ---
-            # La BS 0 Sector 0 mira a 30 grados. 
-            # Chequear si el interferente cae en su lóbulo principal.
-            # Ángulo de llegada del interferente:
-            angle_rad = np.arctan2(interferer_pos[1], interferer_pos[0])
-            angle_deg = np.degrees(angle_rad)
-            
-            boresight = SECTOR_BORESIGHTS[0] # 30 grados
-            diff = np.abs(angle_deg - boresight)
-            diff = diff % 360
-            if diff > 180: diff = 360 - diff
-            
-            # Ganancia de antena: 1 (0dB) si está dentro, 0 (linear) si fuera
-            antenna_gain = 1.0 if diff <= (SECTOR_WIDTH / 2) else 0.0
-            
-            if antenna_gain > 0:
-                p_rx_interf = p_tx_interferer * gain_to_victim * antenna_gain
-                interference_sum += p_rx_interf
+            D = np.linalg.norm(victim_pos - interferer_pos)
+            interference_sum += (D/R) ** pathloss_exp
+        
 
     if interference_sum == 0:
         return np.inf # Caso ideal
         
-    return p_rx_signal / interference_sum
+    return signal/interference_sum
