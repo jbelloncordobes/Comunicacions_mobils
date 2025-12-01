@@ -54,34 +54,6 @@ def generate_hex_grid():
         centers.append((2 * d * dx1, 2 * d * dy1))
     return np.array(centers)
 
-# def get_random_user_in_sector_0():
-#     """
-#     Generates a uniformly distributed user inside a 120° sector 
-#     of a flat-top hexagonal cell.
-
-#     Sector 0 is centered at 0° and spans [-60°, +60°].
-#     """
-
-#     # generate_uniform_points(1, CELL_RADIUS, 0, 0)
-
-#     # 1. Sample angle inside sector
-#     # theta = np.radians(np.random.uniform(-60, +60))
-#     theta = np.radians(np.random.uniform(0, +120))
-
-#     # 2. Hex boundary at this angle
-#     # flat-top hex (0° faces), no additional rotation needed
-#     R = CELL_RADIUS
-#     denom = abs(np.cos(theta)) + np.sqrt(3)*abs(np.sin(theta))
-#     Rmax = R / denom
-
-#     # 3. Uniform area sampling
-#     r = np.sqrt(np.random.rand()) * Rmax
-
-#     # 4. Cartesian coordinates
-#     x = r * np.cos(theta)
-#     y = r * np.sin(theta)
-#     return np.array([x, y])
-
 def get_random_user_in_sector_0():
     """
     Genera un usuario aleatorio uniforme en un rombo de 120 grados
