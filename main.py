@@ -166,6 +166,60 @@ def ex2():
     plt.grid()
     plt.show()
 
+# ==========================================
+# 3. EJERCICIO 3: POWER CONTROL (N=3, 3.8, 4.5)
+# ==========================================
+def ex3():
+    print("Simulating Question 3...")
+    powconts = np.arange(0, 1.1, 0.1)
+    best_powcont = 0
+    best_prob = 0
+    best_sirs = None
+
+    for a in powconts:
+        s = run_simulation(reuse=3, powcont=a, v_exp=3)
+        prob = np.mean(10*np.log10(s) >= -5)
+        if prob > best_prob:
+            best_prob = prob
+            best_powcont = a
+            best_sirs = s
+
+    print(f"Mejor Power Control (v = 3): {best_powcont:.1f} con cobertura {best_prob:.2%}")
+
+    plt.figure()
+    plot_cdf(sir_n3, "Power Control = 0 (v = 3)")
+    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 3)")
+
+    for a in powconts:
+        s = run_simulation(reuse=3, powcont=a, v_exp=3.8)
+        prob = np.mean(10*np.log10(s) >= -5)
+        if prob > best_prob:
+            best_prob = prob
+            best_powcont = a
+            best_sirs = s
+
+    print(f"Mejor Power Control (v = 3.8): {best_powcont:.1f} con cobertura {best_prob:.2%}")
+
+    plot_cdf(sir_n3, "Power Control = 0 (v = 3.8)")
+    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 3.8)")
+
+    for a in powconts:
+        s = run_simulation(reuse=3, powcont=a, v_exp=4.5)
+        prob = np.mean(10*np.log10(s) >= -5)
+        if prob > best_prob:
+            best_prob = prob
+            best_powcont = a
+            best_sirs = s
+
+    print(f"Mejor Power Control (v = 4.5): {best_powcont:.1f} con cobertura {best_prob:.2%}")
+
+    plot_cdf(sir_n3, "Power Control = 0 (v = 4.5)")
+    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 4.5)")
+
+    plt.title(f"Impact of Fractional Power Control (N=3, 3.8, 4.5)")
+    plt.legend()
+    plt.grid()
+    plt.show()
 
 # ==========================================
 # 4. EJERCICIO 4: THROUGHPUT
@@ -200,6 +254,7 @@ def ex4(sir_n1, sir_n3, sir_n9):
     plt.show()
 
 if __name__ == "__main__":
-    sir_n1, sir_n3, sir_n9 = ex1() # Tenemos que tener en cuenta solo los sectores en la dirección del sector 0. Dos sectores se cortan por la mitad así que tenemos en cuenta solo 1 sector por esos dos.
-    ex2()
+    # sir_n1, sir_n3, sir_n9 = ex1() # Tenemos que tener en cuenta solo los sectores en la dirección del sector 0. Dos sectores se cortan por la mitad así que tenemos en cuenta solo 1 sector por esos dos.
+    # ex2()
+    ex3()
     # ex4(sir_n1, sir_n3, sir_n9)
