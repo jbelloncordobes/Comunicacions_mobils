@@ -114,7 +114,7 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
 
             # --- SI ES CO-CANAL, CALCULAMOS POTENCIA ---
             interferer_pos = users_tensor[c, s]
-            d = np.linalg.norm(victim_pos - interferer_pos)
+            d = np.linalg.norm(bs_victim_pos - interferer_pos)
             interference_sum += get_channel_gain(d, pathloss_exp)
 
     if interference_sum == 0:

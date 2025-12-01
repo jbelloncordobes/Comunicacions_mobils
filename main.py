@@ -82,8 +82,8 @@ bs_centers = generate_hex_grid()
 def run_simulation(reuse, powcont, v_exp):
     sirs = []
     
-    # centers = generate_hex_grid()
-    # users = generate_all_users(centers)
+    centers = generate_hex_grid()
+    users = generate_all_users(centers)
     
     # print("Mostrando geometría... Cierra la ventana para continuar.")
     # plot_snapshot_geometry(centers, users)
