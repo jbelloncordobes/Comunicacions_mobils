@@ -119,8 +119,6 @@ def ex1():
     plot_cdf(sir_n1, "N=1")
     plot_cdf(sir_n3, "N=3")
     plot_cdf(sir_n9, "N=9")
-    # N=9 es probable que no se vea si es infinito, agregamos nota
-    plt.axvline(x=100, label="N=9 (Ideal)", linestyle="--", color="green")
     plt.axvline(-5, color='r', linestyle=':', label="Target -5 dB")
     plt.title("CDF of Uplink SIR (One user per sector)")
     plt.xlabel("SIR (dB)")
@@ -223,6 +221,8 @@ def ex3():
     plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 4.5)")
 
     plt.title(f"Impact of Fractional Power Control (N=3, 3.8, 4.5)")
+    plt.xlabel("SIR (dB)")
+    plt.ylabel("CDF")
     plt.legend()
     plt.grid()
     plt.show()
@@ -233,36 +233,63 @@ def ex3():
 def ex4(sir_n1, sir_n3, sir_n9):
     print("Simulating Question 4...")
     # Throughput = (W/N) * log2(1 + SIR/Gamma)
-    # Reuse implica dividir ancho de banda W entre los sectores/celdas.
-    # N=1: BW total en cada sector? Ojo: "Universal BW reuse" -> W en cada sector.
-    # N=3: "Different BW in each sector" -> W/3 por sector.
-
     gamma = 10**(SNR_GAP_DB/10)
 
-    # Tasas
+    # Rates in bps
     rate_n1 = (TOTAL_BANDWIDTH / 1) * np.log2(1 + sir_n1 / gamma)
     rate_n3 = (TOTAL_BANDWIDTH / 3) * np.log2(1 + sir_n3 / gamma)
-    rate_n9 = (TOTAL_BANDWIDTH / 3) * np.log2(1 + sir_n9 / gamma)
+    rate_n9 = (TOTAL_BANDWIDTH / 9) * np.log2(1 + sir_n9 / gamma)
 
-    plt.figure()
-    # Función auxiliar para rate
-    def plot_rate(data, lbl):
-        d = np.sort(data)/1e6
-        y = np.arange(len(d))/len(d)
-        plt.plot(d, y, label=lbl)
+    # Helper to prepare sorted, finite, non-negative Mbps arrays
+    def prepare_rate(r):
+        r = np.array(r, dtype=float)
+        r = r[np.isfinite(r)]       # drop inf/nan
+        r = r[r > 0]                # drop non-positive rates (if any)
+        r_mbps = r / 1e6            # convert to Mbps
+        r_sorted = np.sort(r_mbps)
+        return r_sorted
 
-    plot_rate(rate_n1, "N=1 (BW=100M)")
-    plot_rate(rate_n3, "N=3 (BW=33M)")
-    plot_rate(rate_n9, "N=3 (BW=?)")
+    r1 = prepare_rate(rate_n1)
+    r3 = prepare_rate(rate_n3)
+    r9 = prepare_rate(rate_n9)
+
+    plt.figure(figsize=(8,6))
+
+    def plot_rate_cdf(sorted_mbps, lbl):
+        if len(sorted_mbps) == 0:
+            return
+        y = np.linspace(0, 1, len(sorted_mbps))        # proper CDF axis from 0 to 1
+        plt.plot(sorted_mbps, y, label=lbl)
+
+    plot_rate_cdf(r1, "N=1 (BW=100 MHz)")
+    plot_rate_cdf(r3, "N=3 (BW=33.33 MHz)")
+    plot_rate_cdf(r9, "N=9 (BW=11.11 MHz)")
+
     plt.title("User Throughput CDF")
-    plt.xlabel("Mbps")
+    plt.xlabel("Throughput (Mbps)")
     plt.ylabel("CDF")
+    plt.grid(True, linestyle=':', alpha=0.4)
     plt.legend()
-    plt.grid()
     plt.show()
 
+    # Statistics (in Mbps)
+    avg1 = np.mean(r1) if len(r1)>0 else np.nan
+    avg3 = np.mean(r3) if len(r3)>0 else np.nan
+    avg9 = np.mean(r9) if len(r9)>0 else np.nan
+
+    # the value r such that 97% of users have rate >= r -> that's the 3rd percentile.
+    r97_1 = np.percentile(r1, 3) if len(r1)>0 else np.nan
+    r97_3 = np.percentile(r3, 3) if len(r3)>0 else np.nan
+    r97_9 = np.percentile(r9, 3) if len(r9)>0 else np.nan
+
+
+    print(f"Average bit rate (Mbps): N=1 -> {avg1:.2f} Mbps, N=3 -> {avg3:.2f} Mbps, N=9 -> {avg9:.2f} Mbps")
+    print(f"Rate that 97% of users achieve or exceed (3rd percentile) [Mbps]: N=1 -> {r97_1:.2f}, N=3 -> {r97_3:.2f}, N=9 -> {r97_9:.2f}")
+   
+
 if __name__ == "__main__":
-    # sir_n1, sir_n3, sir_n9 = ex1() # Tenemos que tener en cuenta solo los sectores en la dirección del sector 0. Dos sectores se cortan por la mitad así que tenemos en cuenta solo 1 sector por esos dos.
+    sir_n1, sir_n3, sir_n9 = ex1() # Tenemos que tener en cuenta solo los sectores en la dirección del sector 0. Dos sectores se cortan por la mitad así que tenemos en cuenta solo 1 sector por esos dos.
     # ex2()
-    ex3()
-    # ex4(sir_n1, sir_n3, sir_n9)
+    # ex3()
+    # We can reuse the simulations from ex1 to save time
+    ex4(sir_n1, sir_n3, sir_n9)
