@@ -143,10 +143,12 @@ def ex1():
 # ==========================================
 def ex2():
     print("Simulating Question 2...")
-    powconts = np.arange(0, 1.1, 0.1)
+    powconts = np.arange(0.1, 1.1, 0.1)
     best_powcont = 0
     best_prob = 0
     best_sirs = None
+
+    simulation_0 = run_simulation(reuse=3, powcont=0, v_exp=3.8)
 
     for a in powconts:
         s = run_simulation(reuse=3, powcont=a, v_exp=3.8)
@@ -159,7 +161,7 @@ def ex2():
     print(f"Mejor Power Control: {best_powcont:.1f} con cobertura {best_prob:.2%}")
 
     plt.figure()
-    plot_cdf(sir_n3, "Power Control = 0")
+    plot_cdf(simulation_0, "Power Control = 0")
     plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f}")
     plt.title(f"Impact of Fractional Power Control (N=3)")
     plt.legend()
@@ -171,11 +173,12 @@ def ex2():
 # ==========================================
 def ex3():
     print("Simulating Question 3...")
-    powconts = np.arange(0, 1.1, 0.1)
+    powconts = np.arange(0.1, 1.1, 0.1)
     best_powcont = 0
     best_prob = 0
     best_sirs = None
 
+    
     for a in powconts:
         s = run_simulation(reuse=3, powcont=a, v_exp=3)
         prob = np.mean(10*np.log10(s) >= -5)
@@ -187,7 +190,8 @@ def ex3():
     print(f"Mejor Power Control (v = 3): {best_powcont:.1f} con cobertura {best_prob:.2%}")
 
     plt.figure()
-    plot_cdf(sir_n3, "Power Control = 0 (v = 3)")
+    # simulation_0_v3 = run_simulation(reuse=3, powcont=0, v_exp=3)
+    # plot_cdf(simulation_0_v3, "Power Control = 0 (v = 3)")
     plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 3)")
 
     for a in powconts:
@@ -200,7 +204,8 @@ def ex3():
 
     print(f"Mejor Power Control (v = 3.8): {best_powcont:.1f} con cobertura {best_prob:.2%}")
 
-    plot_cdf(sir_n3, "Power Control = 0 (v = 3.8)")
+    # simulation_0_v38 = run_simulation(reuse=3, powcont=0, v_exp=3.8)
+    # plot_cdf(simulation_0_v38, "Power Control = 0 (v = 3.8)")
     plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 3.8)")
 
     for a in powconts:
@@ -213,7 +218,8 @@ def ex3():
 
     print(f"Mejor Power Control (v = 4.5): {best_powcont:.1f} con cobertura {best_prob:.2%}")
 
-    plot_cdf(sir_n3, "Power Control = 0 (v = 4.5)")
+    # simulation_0_v45 = run_simulation(reuse=3, powcont=0, v_exp=4.5)
+    # plot_cdf(simulation_0_v45, "Power Control = 0 (v = 4.5)")
     plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 4.5)")
 
     plt.title(f"Impact of Fractional Power Control (N=3, 3.8, 4.5)")
@@ -236,6 +242,7 @@ def ex4(sir_n1, sir_n3, sir_n9):
     # Tasas
     rate_n1 = (TOTAL_BANDWIDTH / 1) * np.log2(1 + sir_n1 / gamma)
     rate_n3 = (TOTAL_BANDWIDTH / 3) * np.log2(1 + sir_n3 / gamma)
+    rate_n9 = (TOTAL_BANDWIDTH / 3) * np.log2(1 + sir_n9 / gamma)
 
     plt.figure()
     # Función auxiliar para rate
@@ -246,6 +253,7 @@ def ex4(sir_n1, sir_n3, sir_n9):
 
     plot_rate(rate_n1, "N=1 (BW=100M)")
     plot_rate(rate_n3, "N=3 (BW=33M)")
+    plot_rate(rate_n9, "N=3 (BW=?)")
     plt.title("User Throughput CDF")
     plt.xlabel("Mbps")
     plt.ylabel("CDF")
