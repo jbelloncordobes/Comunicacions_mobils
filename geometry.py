@@ -1,5 +1,37 @@
 import numpy as np
 from config import CELL_RADIUS, SECTOR_BORESIGHTS
+import math
+import random
+
+# def generate_uniform_points(num_points, radius, x_center, y_center):
+#     """
+#     Generates a list of uniformly distributed random points within a circle.
+
+#     Args:
+#         num_points (int): The number of points to generate.
+#         radius (float): The radius of the circle.
+#         x_center (float): The x-coordinate of the circle's center.
+#         y_center (float): The y-coordinate of the circle's center.
+
+#     Returns:
+#         list[list[float]]: A list of [x, y] coordinates.
+#     """
+#     points = []
+#     for _ in range(num_points):
+#         # Generate a random radius with a proper distribution
+#         # This ensures uniform area distribution, not uniform radius distribution
+#         r = radius * math.sqrt(random.uniform(0, 1))
+
+#         # Generate a random angle (theta) in radians
+#         theta = random.uniform(0, 1) * 2 * math.pi
+
+#         # Convert polar to Cartesian coordinates
+#         x = x_center + r * math.cos(theta)
+#         y = y_center + r * math.sin(theta)
+
+#         points.append([x, y])
+#     return points
+
 
 def generate_hex_grid():
     """ Genera los centros de las 19 celdas (sin cambios) """
@@ -24,94 +56,68 @@ def generate_hex_grid():
 
 def get_random_user_in_sector_0():
     """
-    Generates a uniformly distributed user inside a 120° sector 
-    of a flat-top hexagonal cell.
-
-    Sector 0 is centered at 0° and spans [-60°, +60°].
+    Genera un usuario aleatorio uniforme en un rombo de 120 grados
+    orientado a 30 grados (Sector 0 estándar).
+    Usamos la técnica del rombo (dos vectores base). 
     """
 
-    # 1. Sample angle inside sector
-    # theta = np.radians(np.random.uniform(-60, +60))
-    theta = np.radians(np.random.uniform(0, +120))
+    # Vectores base para un rombo de 120 grados (0 a 120 grados geométricos)
+    # Luego rotaremos para alinear con 30 grados.
+    u = np.random.rand() 
+    v = np.random.rand()
 
-    # 2. Hex boundary at this angle
-    # flat-top hex (0° faces), no additional rotation needed
-    R = CELL_RADIUS
-    denom = abs(np.cos(theta)) + np.sqrt(3)*abs(np.sin(theta))
-    Rmax = R / denom
+    # Lado del hexágono = Radius
+    # Altura apotema = Radius * sqrt(3)/2
 
-    # 3. Uniform area sampling
-    r = np.sqrt(np.random.rand()) * Rmax
+    # Coordenadas en sistema oblicuo transformadas a cartesianas
+    # Para cubrir un sector de 120 grados de un hexágono uniformemente:
+    # Es más fácil generar en un triangulo equilatero y reflejar,
+    # o usar coordenadas polares con corrección de área.
 
-    # 4. Cartesian coordinates
-    x = r * np.cos(theta)
-    y = r * np.sin(theta)
-    return np.array([x, y])
+    # Método polar corregido para densidad uniforme de área:
+    # r ~ sqrt(uniform(0,1)) * R_max(theta)
+    # Pero R_max depende del ángulo en un hexágono.
 
-# def get_random_user_in_sector_0():
-#     """
-#     Genera un usuario aleatorio uniforme en un rombo de 120 grados
-#     orientado a 30 grados (Sector 0 estándar).
-#     Usamos la técnica del rombo (dos vectores base). 
-#     """
+    # Método simple (Rejection Sampling):
+    # Generar en caja, rotar y chequear. Es rápido y exacto.
 
-#     # Vectores base para un rombo de 120 grados (0 a 120 grados geométricos)
-#     # Luego rotaremos para alinear con 30 grados.
-#     u = np.random.rand() 
-#     v = np.random.rand()
+    while True:
+        # Generar punto en el cuadrado que contiene al hexágono
+        x = np.random.uniform(-CELL_RADIUS, CELL_RADIUS) 
+        y = np.random.uniform(-CELL_RADIUS, CELL_RADIUS)
 
-#     # Lado del hexágono = Radius
-#     # Altura apotema = Radius * sqrt(3)/2
+        # Angulo y radio
+        angle_deg = np.degrees(np.arctan2(y, x)) % 360
+        dist = np.sqrt(x**2 + y**2)
 
-#     # Coordenadas en sistema oblicuo transformadas a cartesianas
-#     # Para cubrir un sector de 120 grados de un hexágono uniformemente:
-#     # Es más fácil generar en un triangulo equilatero y reflejar,
-#     # o usar coordenadas polares con corrección de área.
+        # Verificar si está dentro del Sector 0 (Angulos 0 a +120)
+        in_angle = (angle_deg <= 120)
 
-#     # Método polar corregido para densidad uniforme de área:
-#     # r ~ sqrt(uniform(0,1)) * R_max(theta)
-#     # Pero R_max depende del ángulo en un hexágono.
+        # Verificar distancia al borde del hexágono
+        # Ecuación polar del hexágono: R_max(theta)
+        # r * cos(theta - k*60) <= sqrt(3)/2 * R
+        # Simplemente usamos la condición geométrica simple:
+        # Proyección sobre ejes rotados.
 
-#     # Método simple (Rejection Sampling):
-#     # Generar en caja, rotar y chequear. Es rápido y exacto.
+        if in_angle:
+            # Check hex boundary
+            # Condición: x*cos(30) + y*sin(30) <= apotema ... etc
+            # Manera rápida: q = abs(x), si q > R...
+            # Usaremos una aproximación poligonal exacta:
+            p_angle = np.radians(angle_deg)
+            # Distancia máxima en ese ángulo para un hexágono "flat top"
+            # El radio varía. Para simplificar simulación académica:
+            # Aceptamos si dist < Apotema (conservador) o dist < Radio (optimista).
+            # El enunciado dice "Uniform within their sectors".
+            # Haremos: si dist < CELL_RADIUS * 0.866 (apotema), aceptamos seguro.
+            # Si no, chequeo fino.
 
-#     while True:
-#         # Generar punto en el cuadrado que contiene al hexágono
-#         x = np.random.uniform(-CELL_RADIUS, CELL_RADIUS) 
-#         y = np.random.uniform(-CELL_RADIUS, CELL_RADIUS)
-
-#         # Angulo y radio
-#         angle_deg = np.degrees(np.arctan2(y, x)) % 360
-#         dist = np.sqrt(x**2 + y**2)
-
-#         # Verificar si está dentro del Sector 0 (Angulos 0 a +120)
-#         in_angle = (angle_deg <= 120)
-
-#         # Verificar distancia al borde del hexágono
-#         # Ecuación polar del hexágono: R_max(theta)
-#         # r * cos(theta - k*60) <= sqrt(3)/2 * R
-#         # Simplemente usamos la condición geométrica simple:
-#         # Proyección sobre ejes rotados.
-
-#         if in_angle:
-#             # Check hex boundary
-#             # Condición: x*cos(30) + y*sin(30) <= apotema ... etc
-#             # Manera rápida: q = abs(x), si q > R...
-#             # Usaremos una aproximación poligonal exacta:
-#             p_angle = np.radians(angle_deg)
-#             # Distancia máxima en ese ángulo para un hexágono "flat top"
-#             # El radio varía. Para simplificar simulación académica:
-#             # Aceptamos si dist < Apotema (conservador) o dist < Radio (optimista).
-#             # El enunciado dice "Uniform within their sectors".
-#             # Haremos: si dist < CELL_RADIUS * 0.866 (apotema), aceptamos seguro.
-#             # Si no, chequeo fino.
-
-#             # Simplificación aceptada en la mayoría de proyectos: Radio circular para sector
-#             # Si quieres hexágono exacto:
-#             phi = np.radians(angle_deg % 60 - 30)
-#             rmax = (np.sqrt(3)/2 * CELL_RADIUS) / np.cos(phi)
-#             if dist <= rmax: 
-#                 return np.array([x, y])
+            # Simplificación aceptada en la mayoría de proyectos: Radio circular para sector
+            # Si quieres hexágono exacto:
+            phi = np.radians(angle_deg % 60 - 30)
+            rmax = (np.sqrt(3)/2 * CELL_RADIUS) / np.cos(phi)
+            if dist <= rmax: 
+                return np.array([x, y])
 
 def generate_all_users(bs_centers):
     """
