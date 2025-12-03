@@ -82,8 +82,8 @@ bs_centers = generate_hex_grid()
 def run_simulation(reuse, powcont, v_exp):
     sirs = []
     
-    centers = generate_hex_grid()
-    users = generate_all_users(centers)
+    # centers = generate_hex_grid()
+    # users = generate_all_users(centers)
     
     # print("Mostrando geometría... Cierra la ventana para continuar.")
     # plot_snapshot_geometry(centers, users)
@@ -96,12 +96,16 @@ def run_simulation(reuse, powcont, v_exp):
         sirs.append(val)
     return np.array(sirs)
 
-def plot_cdf(data, label):
+def plot_cdf(data, label, color=None):
     data = data[np.isfinite(data)]
     if len(data) == 0: return
     sorted_data = np.sort(data)
     yvals = np.arange(len(sorted_data)) / float(len(sorted_data) - 1)
-    plt.plot(10 * np.log10(sorted_data), yvals, label=label)
+    if color:
+        plt.plot(10 * np.log10(sorted_data), yvals, label=label, color=color)
+    else:
+        plt.plot(10 * np.log10(sorted_data), yvals, label=label)
+
 
 # ==========================================
 # 1. EJERCICIO 1: REUSE FACTORS
@@ -188,9 +192,9 @@ def ex3():
     print(f"Mejor Power Control (v = 3): {best_powcont:.1f} con cobertura {best_prob:.2%}")
 
     plt.figure()
-    # simulation_0_v3 = run_simulation(reuse=3, powcont=0, v_exp=3)
-    # plot_cdf(simulation_0_v3, "Power Control = 0 (v = 3)")
-    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 3)")
+    simulation_0_v3 = run_simulation(reuse=3, powcont=0, v_exp=3)
+    plot_cdf(simulation_0_v3, "Power Control = 0 (v = 3)", "green")
+    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 3)", "yellow")
 
     for a in powconts:
         s = run_simulation(reuse=3, powcont=a, v_exp=3.8)
@@ -202,9 +206,9 @@ def ex3():
 
     print(f"Mejor Power Control (v = 3.8): {best_powcont:.1f} con cobertura {best_prob:.2%}")
 
-    # simulation_0_v38 = run_simulation(reuse=3, powcont=0, v_exp=3.8)
-    # plot_cdf(simulation_0_v38, "Power Control = 0 (v = 3.8)")
-    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 3.8)")
+    simulation_0_v38 = run_simulation(reuse=3, powcont=0, v_exp=3.8)
+    plot_cdf(simulation_0_v38, "Power Control = 0 (v = 3.8)", "red")
+    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 3.8)", "orange")
 
     for a in powconts:
         s = run_simulation(reuse=3, powcont=a, v_exp=4.5)
@@ -216,9 +220,9 @@ def ex3():
 
     print(f"Mejor Power Control (v = 4.5): {best_powcont:.1f} con cobertura {best_prob:.2%}")
 
-    # simulation_0_v45 = run_simulation(reuse=3, powcont=0, v_exp=4.5)
-    # plot_cdf(simulation_0_v45, "Power Control = 0 (v = 4.5)")
-    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 4.5)")
+    simulation_0_v45 = run_simulation(reuse=3, powcont=0, v_exp=4.5)
+    plot_cdf(simulation_0_v45, "Power Control = 0 (v = 4.5)", "magenta")
+    plot_cdf(best_sirs, f"Power Control = {best_powcont:.1f} (v = 4.5)", "purple")
 
     plt.title(f"Impact of Fractional Power Control (N=3, 3.8, 4.5)")
     plt.xlabel("SIR (dB)")
@@ -261,17 +265,6 @@ def ex4(sir_n1, sir_n3, sir_n9):
         y = np.linspace(0, 1, len(sorted_mbps))        # proper CDF axis from 0 to 1
         plt.plot(sorted_mbps, y, label=lbl)
 
-    plot_rate_cdf(r1, "N=1 (BW=100 MHz)")
-    plot_rate_cdf(r3, "N=3 (BW=33.33 MHz)")
-    plot_rate_cdf(r9, "N=9 (BW=11.11 MHz)")
-
-    plt.title("User Throughput CDF")
-    plt.xlabel("Throughput (Mbps)")
-    plt.ylabel("CDF")
-    plt.grid(True, linestyle=':', alpha=0.4)
-    plt.legend()
-    plt.show()
-
     # Statistics (in Mbps)
     avg1 = np.mean(r1) if len(r1)>0 else np.nan
     avg3 = np.mean(r3) if len(r3)>0 else np.nan
@@ -282,14 +275,25 @@ def ex4(sir_n1, sir_n3, sir_n9):
     r97_3 = np.percentile(r3, 3) if len(r3)>0 else np.nan
     r97_9 = np.percentile(r9, 3) if len(r9)>0 else np.nan
 
-
     print(f"Average bit rate (Mbps): N=1 -> {avg1:.2f} Mbps, N=3 -> {avg3:.2f} Mbps, N=9 -> {avg9:.2f} Mbps")
     print(f"Rate that 97% of users achieve or exceed (3rd percentile) [Mbps]: N=1 -> {r97_1:.2f}, N=3 -> {r97_3:.2f}, N=9 -> {r97_9:.2f}")
-   
+
+    plot_rate_cdf(r1, "N=1 (BW=100 MHz)")
+    plot_rate_cdf(r3, "N=3 (BW=33.33 MHz)")
+    plot_rate_cdf(r9, "N=9 (BW=11.11 MHz)")
+
+    plt.title("User Throughput CDF")
+    plt.xlabel("Throughput (Mbps)")
+    plt.ylabel("CDF")
+    plt.grid(True, linestyle=':', alpha=0.4)
+    plt.xlim(-20, 1250.0)
+    plt.legend()
+    plt.show()
+
 
 if __name__ == "__main__":
     sir_n1, sir_n3, sir_n9 = ex1() # Tenemos que tener en cuenta solo los sectores en la dirección del sector 0. Dos sectores se cortan por la mitad así que tenemos en cuenta solo 1 sector por esos dos.
     # ex2()
-    # ex3()
+    ex3()
     # We can reuse the simulations from ex1 to save time
     ex4(sir_n1, sir_n3, sir_n9)
