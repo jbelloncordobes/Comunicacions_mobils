@@ -1,5 +1,4 @@
 import numpy as np
-from config import SECTOR_BORESIGHTS, SECTOR_WIDTH
 from channel import get_channel_gain
 
 

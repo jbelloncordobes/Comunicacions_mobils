@@ -8,50 +8,10 @@ Wireless channel models:
 """
 
 import numpy as np
-from config import PATHLOSS_EXPONENT, SHADOW_FADING_STD
-
-
-# -----------------------------------------------------
-# 1. PATH LOSS MODEL
-# -----------------------------------------------------
-def path_loss(distances):
-    """
-    Computa la pérdida de path-loss para cada distancia
-
-    PL ∝ d^{-ν}
-    Alfa se cancela en SIR, usamos la forma proporcional
- 
-    Args:
-        distances : ndarray of shape (19,)
-
-    Returns:
-        pl : ndarray of shape (19,)   (path-loss gain)
-    """
-    return distances ** (-PATHLOSS_EXPONENT)
-
+from config import SHADOW_FADING_STD
 
 # -----------------------------------------------------
-# 2. SHADOW FADING (LOG-NORMAL)
-# -----------------------------------------------------
-def shadow_fading(num_samples):
-    """
-    Genera valores de shadow fading usando distribución log-normal
-
-        X ~ N(0, σ^2) in dB
-        SF_linear = 10^(X/10)
-
-    Args:
-        num_samples : int
-
-    Returns:
-        sf : ndarray of shape (num_samples,)
-    """
-    X = np.random.normal(loc = 0, scale = SHADOW_FADING_STD, size = num_samples)
-    return 10 ** (X / 10)
-
-
-# -----------------------------------------------------
-# 3. TOTAL CHANNEL GAIN
+# TOTAL CHANNEL GAIN
 # -----------------------------------------------------
 def get_channel_gain(distance, pathloss_exp):
     # Evitar log(0)
