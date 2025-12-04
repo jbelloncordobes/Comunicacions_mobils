@@ -5,7 +5,6 @@ import numpy as np
 # ---------------------------
 NUM_SNAPSHOTS = 1500       # Cantidad de iteraciones Monte-Carlo
 CELL_RADIUS = 1000         # Metros
-NUM_CELLS = 19
 NUM_SECTORS = 3            # Sectores por celda
 
 # ---------------------------

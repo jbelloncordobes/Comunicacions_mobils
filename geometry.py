@@ -1,40 +1,8 @@
 import numpy as np
-from config import CELL_RADIUS, SECTOR_BORESIGHTS
-import math
-import random
-
-# def generate_uniform_points(num_points, radius, x_center, y_center):
-#     """
-#     Generates a list of uniformly distributed random points within a circle.
-
-#     Args:
-#         num_points (int): The number of points to generate.
-#         radius (float): The radius of the circle.
-#         x_center (float): The x-coordinate of the circle's center.
-#         y_center (float): The y-coordinate of the circle's center.
-
-#     Returns:
-#         list[list[float]]: A list of [x, y] coordinates.
-#     """
-#     points = []
-#     for _ in range(num_points):
-#         # Generate a random radius with a proper distribution
-#         # This ensures uniform area distribution, not uniform radius distribution
-#         r = radius * math.sqrt(random.uniform(0, 1))
-
-#         # Generate a random angle (theta) in radians
-#         theta = random.uniform(0, 1) * 2 * math.pi
-
-#         # Convert polar to Cartesian coordinates
-#         x = x_center + r * math.cos(theta)
-#         y = y_center + r * math.sin(theta)
-
-#         points.append([x, y])
-#     return points
-
+from config import CELL_RADIUS, NUM_SECTORS
 
 def generate_hex_grid():
-    """ Genera los centros de las 19 celdas (sin cambios) """
+    """ Genera los centros de las 19 celdas """
     centers = [(0, 0)]
     d = np.sqrt(3) * CELL_RADIUS
     # Direcciones rotadas 30 grados para flat-top
@@ -100,20 +68,7 @@ def get_random_user_in_sector_0():
         # Proyección sobre ejes rotados.
 
         if in_angle:
-            # Check hex boundary
-            # Condición: x*cos(30) + y*sin(30) <= apotema ... etc
-            # Manera rápida: q = abs(x), si q > R...
-            # Usaremos una aproximación poligonal exacta:
-            p_angle = np.radians(angle_deg)
-            # Distancia máxima en ese ángulo para un hexágono "flat top"
-            # El radio varía. Para simplificar simulación académica:
-            # Aceptamos si dist < Apotema (conservador) o dist < Radio (optimista).
-            # El enunciado dice "Uniform within their sectors".
-            # Haremos: si dist < CELL_RADIUS * 0.866 (apotema), aceptamos seguro.
-            # Si no, chequeo fino.
-
-            # Simplificación aceptada en la mayoría de proyectos: Radio circular para sector
-            # Si quieres hexágono exacto:
+            # Radio circular para sector
             phi = np.radians(angle_deg % 60 - 30)
             rmax = (np.sqrt(3)/2 * CELL_RADIUS) / np.cos(phi)
             if dist <= rmax: 
@@ -129,7 +84,7 @@ def generate_all_users(bs_centers):
     users = np.zeros((19, 3, 2))
     
     for c_idx, center in enumerate(bs_centers):
-        for s_idx in range(3):
+        for s_idx in range(NUM_SECTORS):
             # Generar usuario en sector 0 (base)
             u_local = get_random_user_in_sector_0()
             

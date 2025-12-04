@@ -14,6 +14,7 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
     # Usuario víctima: Celda 0, Sector 0
     victim_pos = users_tensor[0, 0]
     bs_victim_pos = bs_centers[0] # (0,0)
+    # Mapeos de los sectores que influyen en cada reuse factor
     mp1 = dict()
     mp1[0] = []
     mp1[1] = [0, 1, 2]
@@ -79,9 +80,7 @@ def calculate_uplink_sir(users_tensor, bs_centers, reuse_factor, powcont, pathlo
     # Calcula la distancia de la victima a su centro y el pathloss de dicha distancia (R)
     R = np.linalg.norm(victim_pos - bs_victim_pos)
     Victim_gain = get_channel_gain(R, pathloss_exp)
-    # signal = (R ** (powcont * pathloss_exp)) * (R ** (-pathloss_exp))
-    # victim_pathloss = 1/(R ** pathloss_exp)
-    # signal = victim_pathloss * (10 ** (SHADOW_FADING_STD/10))
+    
     # --- 2. Calcular Interferencia ---
     interference_sum = 0.0  
     # Iteramos sobre TODAS las celdas y TODOS los sectores

@@ -16,11 +16,11 @@ from config import PATHLOSS_EXPONENT, SHADOW_FADING_STD
 # -----------------------------------------------------
 def path_loss(distances):
     """
-    Computes path-loss gain for each distance.
+    Computa la pérdida de path-loss para cada distancia
 
     PL ∝ d^{-ν}
-    (The absolute constant cancels out in SIR, so we use proportional form.)
-
+    Alfa se cancela en SIR, usamos la forma proporcional
+ 
     Args:
         distances : ndarray of shape (19,)
 
@@ -35,7 +35,7 @@ def path_loss(distances):
 # -----------------------------------------------------
 def shadow_fading(num_samples):
     """
-    Generates log-normal shadow fading values.
+    Genera valores de shadow fading usando distribución log-normal
 
         X ~ N(0, σ^2) in dB
         SF_linear = 10^(X/10)

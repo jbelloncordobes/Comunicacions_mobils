@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import RegularPolygon
-from tqdm import tqdm
 
 from config import NUM_SNAPSHOTS, TOTAL_BANDWIDTH, SNR_GAP_DB, CELL_RADIUS
 from geometry import generate_hex_grid, generate_all_users
@@ -116,7 +115,6 @@ def ex1():
     print("Simulating Question 1...")
     sir_n1 = run_simulation(reuse=1, powcont=0, v_exp=3.8)
     sir_n3 = run_simulation(reuse=3, powcont=0, v_exp=3.8)
-    # sir_n9 dará infinito en grid pequeño, lo simulamos igual
     sir_n9 = run_simulation(reuse=9, powcont=0, v_exp=3.8)
 
     plt.figure(figsize=(8, 6))
@@ -160,7 +158,7 @@ def ex2():
             best_powcont = a
             best_sirs = s
 
-    print(f"Mejor Power Control: {best_powcont:.1f} con cobertura {best_prob:.2%}")
+    print(f"Best Power Control: {best_powcont:.1f} with coverage {best_prob:.2%}")
 
     plt.figure()
     plot_cdf(simulation_0, "Power Control = 0")
@@ -189,7 +187,7 @@ def ex3():
             best_powcont = a
             best_sirs = s
 
-    print(f"Mejor Power Control (v = 3): {best_powcont:.1f} con cobertura {best_prob:.2%}")
+    print(f"Best Power Control (v = 3): {best_powcont:.1f} with coverage {best_prob:.2%}")
 
     plt.figure()
     simulation_0_v3 = run_simulation(reuse=3, powcont=0, v_exp=3)
@@ -204,7 +202,7 @@ def ex3():
             best_powcont = a
             best_sirs = s
 
-    print(f"Mejor Power Control (v = 3.8): {best_powcont:.1f} con cobertura {best_prob:.2%}")
+    print(f"Best Power Control (v = 3.8): {best_powcont:.1f} with coverage {best_prob:.2%}")
 
     simulation_0_v38 = run_simulation(reuse=3, powcont=0, v_exp=3.8)
     plot_cdf(simulation_0_v38, "Power Control = 0 (v = 3.8)", "red")
@@ -218,7 +216,7 @@ def ex3():
             best_powcont = a
             best_sirs = s
 
-    print(f"Mejor Power Control (v = 4.5): {best_powcont:.1f} con cobertura {best_prob:.2%}")
+    print(f"Best Power Control (v = 4.5): {best_powcont:.1f} with coverage {best_prob:.2%}")
 
     simulation_0_v45 = run_simulation(reuse=3, powcont=0, v_exp=4.5)
     plot_cdf(simulation_0_v45, "Power Control = 0 (v = 4.5)", "magenta")
@@ -236,7 +234,6 @@ def ex3():
 # ==========================================
 def ex4(sir_n1, sir_n3, sir_n9):
     print("Simulating Question 4...")
-    # Throughput = (W/N) * log2(1 + SIR/Gamma)
     gamma = 10**(SNR_GAP_DB/10)
 
     # Rates in bps
@@ -244,12 +241,11 @@ def ex4(sir_n1, sir_n3, sir_n9):
     rate_n3 = (TOTAL_BANDWIDTH / 3) * np.log2(1 + sir_n3 / gamma)
     rate_n9 = (TOTAL_BANDWIDTH / 9) * np.log2(1 + sir_n9 / gamma)
 
-    # Helper to prepare sorted, finite, non-negative Mbps arrays
     def prepare_rate(r):
         r = np.array(r, dtype=float)
         r = r[np.isfinite(r)]       # drop inf/nan
-        r = r[r > 0]                # drop non-positive rates (if any)
-        r_mbps = r / 1e6            # convert to Mbps
+        r = r[r > 0]                # drop rates negativos (si hay)
+        r_mbps = r / 1e6            # convertir a Mbps
         r_sorted = np.sort(r_mbps)
         return r_sorted
 
@@ -262,15 +258,15 @@ def ex4(sir_n1, sir_n3, sir_n9):
     def plot_rate_cdf(sorted_mbps, lbl):
         if len(sorted_mbps) == 0:
             return
-        y = np.linspace(0, 1, len(sorted_mbps))        # proper CDF axis from 0 to 1
+        y = np.linspace(0, 1, len(sorted_mbps))        # CDF axis de 0 a 1
         plt.plot(sorted_mbps, y, label=lbl)
 
-    # Statistics (in Mbps)
+    # Estadisticas (Mbps)
     avg1 = np.mean(r1) if len(r1)>0 else np.nan
     avg3 = np.mean(r3) if len(r3)>0 else np.nan
     avg9 = np.mean(r9) if len(r9)>0 else np.nan
 
-    # the value r such that 97% of users have rate >= r -> that's the 3rd percentile.
+    # El valor de r tal que el 97% de usuarios tengan ratio >= r
     r97_1 = np.percentile(r1, 3) if len(r1)>0 else np.nan
     r97_3 = np.percentile(r3, 3) if len(r3)>0 else np.nan
     r97_9 = np.percentile(r9, 3) if len(r9)>0 else np.nan
@@ -292,8 +288,8 @@ def ex4(sir_n1, sir_n3, sir_n9):
 
 
 if __name__ == "__main__":
-    sir_n1, sir_n3, sir_n9 = ex1() # Tenemos que tener en cuenta solo los sectores en la dirección del sector 0. Dos sectores se cortan por la mitad así que tenemos en cuenta solo 1 sector por esos dos.
-    # ex2()
+    sir_n1, sir_n3, sir_n9 = ex1()
+    ex2()
     ex3()
-    # We can reuse the simulations from ex1 to save time
+    # Podemos reutilizar las simulaciones del ex1 para ahorrar tiempo
     ex4(sir_n1, sir_n3, sir_n9)
